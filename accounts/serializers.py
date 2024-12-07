@@ -6,8 +6,7 @@ from accounts.models import OTPRequest
 class OTPRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = OTPRequest
-        fields = ('email', 'request_id')
-        read_only_fields = ('request_id',)
+        fields = ('email',)
 
 
 class VerifyOTPRequestSerializer(serializers.Serializer):
