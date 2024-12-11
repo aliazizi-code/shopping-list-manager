@@ -1,10 +1,12 @@
-from django.contrib.postgres.search import SearchQuery, SearchVector, SearchRank
+from django.contrib.postgres.search import TrigramSimilarity, SearchVector, SearchQuery, SearchRank
+from django.db.models import Q
+from django.db.models.functions import Greatest
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework import viewsets
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.response import Response
 from rest_framework.request import Request
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from lists import serializers
@@ -107,16 +109,25 @@ class SearchView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request: Request):
-        search = request.query_params.get('search')
-        search_query = SearchQuery(search)
-        search_vector = SearchVector('name', 'items__name')
+        search_term = request.query_params.get('search', '')
+
+        search_vector = SearchVector('name', 'description', 'items__name')
+        search_query = SearchQuery(search_term)
+        search_rank = SearchRank(search_vector, search_query)
+
+        similarity_filter = Greatest(
+            TrigramSimilarity('name', search_term),
+            TrigramSimilarity('description', search_term),
+            TrigramSimilarity('items__name', search_term)
+        )
+
         queryset = (
             ShoppingList.objects
-            .annotate(search=search_vector, rank=SearchRank(search_vector, search_query))
-            .filter(user=request.user, search=search_query)
+            .annotate(rank=search_rank, similarity=similarity_filter)
+            .filter(Q(user=request.user), Q(rank__gt=0.3) | Q(similarity__gt=0.3))
             .values('name', 'slug')
             .distinct()
-            .order_by('-rank')
+            .order_by('-rank', '-similarity')
         )
 
         return Response(list(queryset))
