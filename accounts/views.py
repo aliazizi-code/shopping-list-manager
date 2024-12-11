@@ -19,7 +19,7 @@ class OTPRequestView(APIView):
             data = serializer.validated_data
             otp_request, created = OTPRequest.objects.get_or_create(email=data['email'])
             otp_request.refresh(data) if not created else None
-            send_otp(data)
+            send_otp(data['email'])
             return Response(status=status.HTTP_200_OK if not created else status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -34,7 +34,7 @@ class OTPVerifyView(APIView):
 
         if serializer.is_valid():
             data = serializer.validated_data
-            if otp_request.is_valid(data):
+            if otp_request and otp_request.is_valid(data):
                 otp_request.refresh(data)
                 return Response(data=self._handle_login(data), status=status.HTTP_200_OK)
             else:
