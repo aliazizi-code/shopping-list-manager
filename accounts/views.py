@@ -20,6 +20,7 @@ class OTPRequestView(APIView):
             201: serializers.OTPResponseSerializer,
             400: "Invalid Input",
         },
+        summary="Request an OTP for user authentication",
         description="Request an OTP for the provided email."
     )
     def post(self, request: Request):
@@ -56,6 +57,7 @@ class OTPVerifyView(APIView):
             401: 'Unauthorized - Invalid OTP',
             400: 'Invalid Input',
         },
+        summary="Verify an OTP for user login",
         description="Verify the OTP for the provided email."
     )
     def post(self, request: Request):
