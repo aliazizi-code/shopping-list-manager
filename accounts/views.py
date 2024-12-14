@@ -22,7 +22,6 @@ class OTPRequestView(APIView):
         },
         description="Request an OTP for the provided email."
     )
-
     def post(self, request: Request):
         serializer = self.serializer_class(data=request.data)
 
@@ -59,7 +58,6 @@ class OTPVerifyView(APIView):
         },
         description="Verify the OTP for the provided email."
     )
-
     def post(self, request: Request):
         serializer = self.serializer_class(data=request.data)
         otp_request = OTPRequest()
