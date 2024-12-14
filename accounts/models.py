@@ -21,6 +21,9 @@ class OTPRequest(models.Model):
     password = models.CharField(max_length=6, default=generate_otp)
     created_at = models.DateTimeField(auto_now=True, editable=False)
 
+    def __str__(self):
+        return self.email
+
     def is_valid(self, data):
         current_time = timezone.now()
         return OTPRequest.objects.filter(
