@@ -9,7 +9,7 @@ def send_otp(email):
         email = EmailMessage(
             subject='Code',
             body=otp.password,
-            to=email
+            to=[email]
         )
 
         try:
