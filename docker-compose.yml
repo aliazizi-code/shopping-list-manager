@@ -1,0 +1,30 @@
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=shopping_list_db
+    expose:
+      - "5432"
+    restart: always
+
+  web:
+    build: .
+    command: sh -c "python manage.py makemigrations &&
+                    python manage.py migrate &&
+                    python manage.py runserver 0.0.0.0:8000"
+    container_name: web
+    volumes:
+      - .:/src/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    restart: always
+
+volumes:
+  postgres_data:
